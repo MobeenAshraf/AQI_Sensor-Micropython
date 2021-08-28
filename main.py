@@ -118,7 +118,7 @@ led = Pin(2, Pin.OUT)
 interval = 4
 index = 0
 sensor_reading = ''
-skip = 20
+skip = 30
 skip_index = 0
 
 skip_reading(1)
