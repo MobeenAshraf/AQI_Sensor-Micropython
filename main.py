@@ -1,32 +1,27 @@
 # Forked from Adafruit/PMS5003_Air_Quality_Sensor/PMS5003_CircuitPython/PMS5003_example.py
-import urequests
 import utime
+import urequests
+import CONSTANTS
+from time import sleep
 from ntptime import settime
 from machine import RTC, Pin, UART
-from time import sleep
-
 try:
     import struct
 except ImportError:
     import ustruct as struct
 
+HEADER = {"authorization": 'Token {0}'.format(CONSTANTS.INFLUX_DB_TOKEN)}
+INFLUX_URL = "https://us-east-1-1.aws.cloud2.influxdata.com/api/v2/write?org={0}&bucket={1}&precision=s".format(CONSTANTS.INFLUX_ORG,CONSTANTS.INFLUX_BUCKET)
+
 uart = UART(1, baudrate=9600, tx=12, rx=13, timeout=2000)
 
-INFLUX_ORG = 'INFLUX_ORG'
-INFLUX_BUCKET = 'aqi'
-
-headers = {"authorization": "Token {0}".format("TOKEN")}
-url = "https://us-east-1-1.aws.cloud2.influxdata.com/api/v2/write?org={0}&bucket={1}&precision=s".format(INFLUX_ORG,INFLUX_BUCKET)
-data_push_indicator = True
-
-# 
 def do_connect():
     import network
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
     if not wlan.isconnected():
         print('connecting to network...')
-        wlan.connect('WIFI_NAME', 'WIFI_PASS')
+        wlan.connect(CONSTANTS.WIFI_NAME, CONSTANTS.WIFI_PASS)
         while not wlan.isconnected():
             pass
     print('network config:', wlan.ifconfig())
@@ -34,7 +29,7 @@ def do_connect():
 def push_data(resp_data):
     # POST data to influxdb
     try:
-        resp = urequests.post(url, data=resp_data, headers=headers)
+        resp = urequests.post(INFLUX_URL, data=resp_data, headers=HEADER)
         resp.close()
         print('response: {}'.format(resp.status_code))
         return True
@@ -83,7 +78,36 @@ def read_data():
             return None
         buffer = buffer[32:]
         return [pm10_standard, pm25_standard, pm100_standard,pm10_env, pm25_env, pm100_env]
-        
+
+def skip_reading(n):
+    index = 0
+    while index < n:
+        val = read_data()
+        if val:
+            index = index + 1
+
+def string_gen(pm10_standard, pm10_env, pm25_standard, pm25_env, pm100_standard, pm100_env, timestamp, sensor_reading, new_line):
+    sensor_reading += 'aqi,host={0} pm1.0_standard={1} {2} \n'.format('room',pm10_standard,timestamp)
+    sensor_reading += 'aqi,host={0} pm1.0_env={1} {2} \n'.format('room',pm10_env,timestamp)
+    sensor_reading += 'aqi,host={0} pms2.5_standard={1} {2} \n'.format('room',pm25_standard,timestamp)
+    sensor_reading += 'aqi,host={0} pms2.5_env={1} {2} \n'.format('room',pm25_env,timestamp)
+    sensor_reading += 'aqi,host={0} pm10_standard={1} {2} \n'.format('room',pm100_standard,timestamp)
+    if new_line == True:
+        sensor_reading += 'aqi,host={0} pm10_env={1} {2} \n'.format('room',pm100_env,timestamp)
+    else:
+        sensor_reading += 'aqi,host={0} pm10_env={1} {2}'.format('room',pm100_env,timestamp)
+    return sensor_reading
+
+
+
+
+
+
+
+
+
+
+data_push_indicator = True
         
 do_connect()
 rtc = RTC() # initialize the RTC
@@ -94,14 +118,10 @@ led = Pin(2, Pin.OUT)
 interval = 4
 index = 0
 sensor_reading = ''
-skip = 30
+skip = 20
 skip_index = 0
-skip_first_reading = True
 
-while skip_first_reading:
-    val = read_data()
-    if val:
-        skip_first_reading = False
+skip_reading(1)
 
 while True:
     if data_push_indicator == True:
@@ -119,23 +139,12 @@ while True:
             pm10_standard, pm25_standard, pm100_standard,pm10_env, pm25_env, pm100_env = val
             print("Reading: {0}, PM2.5: {1}".format(index, pm25_standard))
             print("---------------------------------------")
-            x = utime.time() + epoch_offset
-            
+            timestamp = utime.time() + epoch_offset
             if index < interval:
                 index = index + 1
-                sensor_reading += 'aqi,host={0} pm1.0_standard={1} {2} \n'.format('room',pm10_standard,x)
-                sensor_reading += 'aqi,host={0} pm1.0_env={1} {2} \n'.format('room',pm10_env,x)
-                sensor_reading += 'aqi,host={0} pms2.5_standard={1} {2} \n'.format('room',pm25_standard,x)
-                sensor_reading += 'aqi,host={0} pms2.5_env={1} {2} \n'.format('room',pm25_env,x)
-                sensor_reading += 'aqi,host={0} pm10_standard={1} {2} \n'.format('room',pm100_standard,x)
-                sensor_reading += 'aqi,host={0} pm10_env={1} {2} \n'.format('room',pm100_env,x)
+                string_gen(pm10_standard, pm10_env, pm25_standard, pm25_env, pm100_standard, pm100_env, timestamp, sensor_reading, True)
             else:
-                sensor_reading += 'aqi,host={0} pm1.0_standard={1} {2} \n'.format('room',pm10_standard,x)
-                sensor_reading += 'aqi,host={0} pm1.0_env={1} {2} \n'.format('room',pm10_env,x)
-                sensor_reading += 'aqi,host={0} pms2.5_standard={1} {2} \n'.format('room',pm25_standard,x)
-                sensor_reading += 'aqi,host={0} pms2.5_env={1} {2} \n'.format('room',pm25_env,x)
-                sensor_reading += 'aqi,host={0} pm10_standard={1} {2} \n'.format('room',pm100_standard,x)
-                sensor_reading += 'aqi,host={0} pm10_env={1} {2}'.format('room',pm100_env,x)
+                string_gen(pm10_standard, pm10_env, pm25_standard, pm25_env, pm100_standard, pm100_env, timestamp, sensor_reading, False)
                 index = 0
                 data_push_indicator = push_data(sensor_reading)
                 sensor_reading = ""

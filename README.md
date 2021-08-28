@@ -60,7 +60,7 @@ For running code, it is preferable to use updated documentation, but below are s
 
 7) Copy main.py and Select File, Save As. Choose Micropython if asked for saving device.
 
-8) Replace ENV variables.
+8) Replace ENV/Constant variables.
 
 9) Press Run.
 
@@ -72,9 +72,6 @@ You should be able to see print values on thonne console !!!
 I recommend viewing console logs to analyze and debug errors.
 After flashing script on board, Blinking LED on board indicates script is working accordingly. Means there is no error in either retrieving sensor data or pushing it on InfluxDB. If led isn't blinking, we should connect with IDE and analyze console logs.
 
-  
-  
-  
 
 ## Reference Link:
 
