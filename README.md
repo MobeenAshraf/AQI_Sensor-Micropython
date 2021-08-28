@@ -12,7 +12,7 @@ This is micro python script that measures AQI values (PM2.5 PM1.0 PM10) and uplo
 
   
 
-1) PMS5003
+1) PMS5003 i.e Plantower Air Quality Sensor
 
 2) Connector Wire (8 pin Molex Connector)
 
