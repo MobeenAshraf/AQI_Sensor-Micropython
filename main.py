@@ -13,6 +13,8 @@ HEADER = {"authorization": 'Token {0}'.format(CONSTANTS.INFLUX_DB_TOKEN)}
 INFLUX_URL = "https://us-east-1-1.aws.cloud2.influxdata.com/api/v2/write?org={0}&bucket={1}&precision=s".format(CONSTANTS.INFLUX_ORG,CONSTANTS.INFLUX_BUCKET)
 
 uart = UART(1, baudrate=9600, tx=12, rx=13, timeout=2000)
+interval = 4
+epoch_offset = 946684800
 
 def do_connect():
     import network
@@ -98,11 +100,24 @@ def string_gen(pm10_standard, pm10_env, pm25_standard, pm25_env, pm100_standard,
     return sensor_reading
 
 
+def sensor_push_at_interval(pm10_standard, pm10_env, pm25_standard, pm25_env, pm100_standard, pm100_env, sensor_reading, index, data_push_indicator):
+    timestamp = utime.time() + epoch_offset
+    if index < interval:
+        index = index + 1
+        sensor_reading = string_gen(pm10_standard, pm10_env, pm25_standard, pm25_env, pm100_standard, pm100_env, timestamp, sensor_reading, True)
+    else:
+        sensor_reading = string_gen(pm10_standard, pm10_env, pm25_standard, pm25_env, pm100_standard, pm100_env, timestamp, sensor_reading, False)
+        index = 0
+        data_push_indicator = push_data(sensor_reading)
+        print(sensor_reading)
+        sensor_reading = ""
+    return [index, data_push_indicator, sensor_reading]
 
-
-
-
-
+def led_toggle(data_push_indicator):
+    if data_push_indicator == True:
+        led.value(not led.value())
+    else:
+        led.value(0)
 
 
 
@@ -112,9 +127,8 @@ do_connect()
 rtc = RTC() # initialize the RTC
 settime() # set the RTC's time using ntptime
 
-epoch_offset = 946684800
 led = Pin(2, Pin.OUT)
-interval = 4
+
 index = 0
 sensor_reading = ''
 skip = 30
@@ -123,10 +137,7 @@ skip_index = 0
 skip_reading(1)
 
 while True:
-    if data_push_indicator == True:
-        led.value(not led.value())
-    else:
-        led.value(0)
+    led_toggle(data_push_indicator)
     sleep(0.5)
     if (data_push_indicator == True) and (skip_index < skip):
         skip_index = skip_index + 1
@@ -138,18 +149,11 @@ while True:
             pm10_standard, pm25_standard, pm100_standard,pm10_env, pm25_env, pm100_env = val
             print("Reading: {0}, PM2.5: {1}".format(index, pm25_standard))
             print("---------------------------------------")
-            timestamp = utime.time() + epoch_offset
-            if index < interval:
-                index = index + 1
-                sensor_reading = string_gen(pm10_standard, pm10_env, pm25_standard, pm25_env, pm100_standard, pm100_env, timestamp, sensor_reading, True)
-            else:
-                sensor_reading = string_gen(pm10_standard, pm10_env, pm25_standard, pm25_env, pm100_standard, pm100_env, timestamp, sensor_reading, False)
-                index = 0
-                data_push_indicator = push_data(sensor_reading)
-                sensor_reading = ""
+            index, data_push_indicator, sensor_reading = sensor_push_at_interval(pm10_standard, pm10_env, pm25_standard, pm25_env, pm100_standard, pm100_env, sensor_reading, index, data_push_indicator)
         else:
             data_push_indicator = False
             print(val)
             uart = UART(1, baudrate=9600, tx=12, rx=13, timeout=2000)
    
     
+
