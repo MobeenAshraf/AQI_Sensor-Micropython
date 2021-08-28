@@ -58,9 +58,9 @@ For running code, it is preferable to use updated documentation, but below are s
 
 6) Install Firmware, (Might have to search more links on deploying firmware. But I had to press Boot button while deploying. Also attaching firmware used in repo)
 
-7) Copy main.py and Select File, Save As. Choose Micropython if asked for saving device.
+7) Copy main.py and Select File, Save As. Choose Micropython if asked for saving device. 
 
-8) Replace ENV/Constant variables.
+8) Copy CONSTANTS.py. Replace ENV/Constant variables values and save.
 
 9) Press Run.
 
