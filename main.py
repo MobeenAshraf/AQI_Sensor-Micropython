@@ -1,4 +1,3 @@
-# Forked from Adafruit/PMS5003_Air_Quality_Sensor/PMS5003_CircuitPython/PMS5003_example.py
 import utime
 import urequests
 import CONSTANTS
