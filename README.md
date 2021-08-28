@@ -1,8 +1,10 @@
 # AQI_Experiment
 
-  
 
 This is micro python script that measures AQI values (PM2.5 PM1.0 PM10) and uploads them on influx DB.
+
+
+![Screenshot from 2021-08-28 20-54-56](https://user-images.githubusercontent.com/13708372/131223616-d2567a1c-a869-4f4e-8598-77c323ae7000.png)
 
   
 
