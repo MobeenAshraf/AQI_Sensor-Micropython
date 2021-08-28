@@ -70,7 +70,7 @@ For running code, it is preferable to use updated documentation, but below are s
 You should be able to see print values on thonne console !!! 
 
 I recommend viewing console logs to analyze and debug errors.
-After flashing script on board, Blinking LED on board indicates script is working accordingly. Means there is no error in either retrieving sensor data or pushing it on InfluxDB. If led isnt blicking, we should connect with IDE and analyze console logs.
+After flashing script on board, Blinking LED on board indicates script is working accordingly. Means there is no error in either retrieving sensor data or pushing it on InfluxDB. If led isn't blinking, we should connect with IDE and analyze console logs.
 
   
   
