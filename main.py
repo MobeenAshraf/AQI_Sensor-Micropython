@@ -142,9 +142,9 @@ while True:
             timestamp = utime.time() + epoch_offset
             if index < interval:
                 index = index + 1
-                string_gen(pm10_standard, pm10_env, pm25_standard, pm25_env, pm100_standard, pm100_env, timestamp, sensor_reading, True)
+                sensor_reading = string_gen(pm10_standard, pm10_env, pm25_standard, pm25_env, pm100_standard, pm100_env, timestamp, sensor_reading, True)
             else:
-                string_gen(pm10_standard, pm10_env, pm25_standard, pm25_env, pm100_standard, pm100_env, timestamp, sensor_reading, False)
+                sensor_reading = string_gen(pm10_standard, pm10_env, pm25_standard, pm25_env, pm100_standard, pm100_env, timestamp, sensor_reading, False)
                 index = 0
                 data_push_indicator = push_data(sensor_reading)
                 sensor_reading = ""
