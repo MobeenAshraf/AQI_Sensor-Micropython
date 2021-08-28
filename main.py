@@ -10,13 +10,13 @@ try:
 except ImportError:
     import ustruct as struct
 
-
 uart = UART(1, baudrate=9600, tx=12, rx=13, timeout=2000)
-token = 'INFLUX_DB_TOKEN'
+
 INFLUX_ORG = 'INFLUX_ORG'
 INFLUX_BUCKET = 'aqi'
-headers = {"authorization": 'Token {1}'.format(token)}
-url = "https://us-east-1-1.aws.cloud2.influxdata.com/api/v2/write?org={1}&bucket={2}&precision=s".format(INFLUX_ORG,INFLUX_BUCKET)
+
+headers = {"authorization": "Token {0}".format("TOKEN")}
+url = "https://us-east-1-1.aws.cloud2.influxdata.com/api/v2/write?org={0}&bucket={1}&precision=s".format(INFLUX_ORG,INFLUX_BUCKET)
 data_push_indicator = True
 
 # 
@@ -94,7 +94,7 @@ led = Pin(2, Pin.OUT)
 interval = 4
 index = 0
 sensor_reading = ''
-skip = 20
+skip = 30
 skip_index = 0
 skip_first_reading = True
 
@@ -123,11 +123,19 @@ while True:
             
             if index < interval:
                 index = index + 1
+                sensor_reading += 'aqi,host={0} pm1.0_standard={1} {2} \n'.format('room',pm10_standard,x)
+                sensor_reading += 'aqi,host={0} pm1.0_env={1} {2} \n'.format('room',pm10_env,x)
                 sensor_reading += 'aqi,host={0} pms2.5_standard={1} {2} \n'.format('room',pm25_standard,x)
                 sensor_reading += 'aqi,host={0} pms2.5_env={1} {2} \n'.format('room',pm25_env,x)
+                sensor_reading += 'aqi,host={0} pm10_standard={1} {2} \n'.format('room',pm100_standard,x)
+                sensor_reading += 'aqi,host={0} pm10_env={1} {2} \n'.format('room',pm100_env,x)
             else:
+                sensor_reading += 'aqi,host={0} pm1.0_standard={1} {2} \n'.format('room',pm10_standard,x)
+                sensor_reading += 'aqi,host={0} pm1.0_env={1} {2} \n'.format('room',pm10_env,x)
                 sensor_reading += 'aqi,host={0} pms2.5_standard={1} {2} \n'.format('room',pm25_standard,x)
-                sensor_reading += 'aqi,host={0} pms2.5_env={1} {2}'.format('room',pm25_env,x)
+                sensor_reading += 'aqi,host={0} pms2.5_env={1} {2} \n'.format('room',pm25_env,x)
+                sensor_reading += 'aqi,host={0} pm10_standard={1} {2} \n'.format('room',pm100_standard,x)
+                sensor_reading += 'aqi,host={0} pm10_env={1} {2}'.format('room',pm100_env,x)
                 index = 0
                 data_push_indicator = push_data(sensor_reading)
                 sensor_reading = ""
