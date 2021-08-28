@@ -92,10 +92,10 @@ def string_gen(pm10_standard, pm10_env, pm25_standard, pm25_env, pm100_standard,
     sensor_reading += 'aqi,host={0} pms2.5_standard={1} {2} \n'.format('room',pm25_standard,timestamp)
     sensor_reading += 'aqi,host={0} pms2.5_env={1} {2} \n'.format('room',pm25_env,timestamp)
     sensor_reading += 'aqi,host={0} pm10_standard={1} {2} \n'.format('room',pm100_standard,timestamp)
+    sensor_reading += 'aqi,host={0} pm10_env={1} {2}'.format('room',pm100_env,timestamp)
     if new_line == True:
-        sensor_reading += 'aqi,host={0} pm10_env={1} {2} \n'.format('room',pm100_env,timestamp)
-    else:
-        sensor_reading += 'aqi,host={0} pm10_env={1} {2}'.format('room',pm100_env,timestamp)
+        sensor_reading += ' \n'
+
     return sensor_reading
 
 
