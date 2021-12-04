@@ -153,19 +153,14 @@ def skip_reading(n):
 skip_reading(1)
 
 while True:
-    sleep(0.5)
+    sleep(1)
 
     val = read_data()
     if val:             
         pm10_standard, pm25_standard, pm100_standard,pm10_env, pm25_env, pm100_env = val
         if ble.start_receiving:
-            ble.send("PM2.5: "+ str(pm25_standard))
+            ble.send("PM1.0: "+ str(pm10_standard) + "  \n PM2.5: "+ str(pm25_standard)  + "  \n PM10: "+ str(pm100_standard)+ "\n\n\n\n")
     else:
         print(val)
         uart = UART(1, baudrate=9600, tx=12, rx=13, timeout=2000)
-   
-    
 
-
-
-# visible in app "Serial Bluetooth Terminal"
